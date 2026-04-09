@@ -1,24 +1,39 @@
 import { useState } from 'react';
-import { getParsedMessage } from '../../student_config';
+import { getParsedMessage, unlockAudio } from '../../student_config';
 
 export default function DebugSoundTest() {
   const [testText, setTestText] = useState("안녕, {{learnerName}}야! 선생님의 또렷한 목소리가 들리니?");
   const [logs, setLogs] = useState<string[]>([]);
   const parsedMsg = getParsedMessage(testText);
 
-  const testServerTTS = () => {
-    addLog(`[통신] 서버 스트리밍 요청: "${parsedMsg}"`);
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ko-KR&client=tw-ob&q=${encodeURIComponent(parsedMsg)}`;
-    addLog(`[경로] 요청 URL: ${url}`);
-    
-    // MP3 직접 스트리밍 (강제 재생)
-    const audio = new Audio(url);
-    
-    audio.onplay = () => addLog('✅ 오디오 재생 성공 (onplay 이벤트 트리거 완료)');
-    audio.onended = () => addLog('⏹️ 오디오 재생 100% 완료 (onended 이벤트 트리거)');
-    audio.onerror = () => addLog(`❌ 오디오 백엔드 에러 발생 (onerror) - 방화벽 또는 네트워크 이슈`);
-    
-    audio.play().catch(e => addLog(`❌ 브라우저 자동재생 보안 정책(CORS 등) 에러: ${e.message}`));
+  const testWebSpeechAPI = async () => {
+    addLog(`[로컬] Web Speech API 음성 재생 테스트: "${parsedMsg}"`);
+
+    // 크롬 Autoplay Policy 해결을 위한 잠금 해제
+    await unlockAudio();
+    addLog(`[잠금해제] 브라우저 음성 시스템 활성화 완료`);
+
+    if (!window.speechSynthesis) {
+      addLog('❌ 브라우저가 Web Speech API를 지원하지 않습니다');
+      return;
+    }
+
+    // 기존 음성 취소
+    window.speechSynthesis.cancel();
+    addLog(`[준비] 기존 음성 재생 취소 완료`);
+
+    // Web Speech API 음성 합성
+    const utterance = new SpeechSynthesisUtterance(parsedMsg);
+    utterance.lang = 'ko-KR';
+    utterance.rate = 0.9;
+    utterance.volume = 1;
+
+    utterance.onstart = () => addLog('✅ 음성 재생 시작 (Web Speech API)');
+    utterance.onend = () => addLog('⏹️ 음성 재생 100% 완료 (onended 이벤트 트리거)');
+    utterance.onerror = (e) => addLog(`❌ Web Speech API 에러: ${e.error}`);
+
+    addLog(`[실행] speechSynthesis.speak() 호출`);
+    window.speechSynthesis.speak(utterance);
   };
 
   const addLog = (msg: string) => {
@@ -28,7 +43,7 @@ export default function DebugSoundTest() {
   return (
     <div className="p-8 text-white bg-slate-900 rounded-[2rem] shadow-2xl h-full flex flex-col items-center">
       <h2 className="text-4xl font-black mb-2 text-pink-400">🔧 긴급: 음성 시스템 디버그 콘솔</h2>
-      <p className="text-slate-400 mb-8 font-bold">오프라인 브라우저 의존성 탈피, 서버 스트리밍 TTS 무결성 테스트 방</p>
+      <p className="text-slate-400 mb-8 font-bold">Web Speech API 안정성 테스트 & 크롬 Autoplay Policy 해결 확인</p>
       
       <div className="w-full max-w-2xl bg-slate-800 p-6 rounded-3xl mb-6 border-2 border-slate-700 shadow-xl">
         <h3 className="text-2xl font-bold mb-4 text-emerald-400">1. 철수 맞춤형 문장 변수({}) 파싱 테스트</h3>
@@ -42,11 +57,11 @@ export default function DebugSoundTest() {
           <span className="text-slate-500 mr-2">파싱 결과:</span> {parsedMsg}
         </div>
         
-        <button 
-          onClick={testServerTTS}
+        <button
+          onClick={testWebSpeechAPI}
           className="w-full bg-pink-600 hover:bg-pink-500 py-5 rounded-2xl font-black text-2xl shadow-[0_0_20px_rgba(219,39,119,0.4)] transition-all hover:scale-[1.02] active:scale-95"
         >
-          🔊 강제 음성 스트리밍 즉시 실행 (Server TTS)
+          🔊 Web Speech API 음성 재생 테스트
         </button>
       </div>
 

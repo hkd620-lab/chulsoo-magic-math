@@ -6,7 +6,7 @@ export const STUDENT_CONFIG = {
     // 💎 [프리미엄 보이스 설정] Google Cloud Neural2
     // ------------------------------------------
     apiKey: import.meta.env.VITE_GOOGLE_TTS_API_KEY || '', // .env 파일에 키 입력
-    voiceId: 'ko-KR-Neural2-A', // 'ko-KR-Neural2-A' (여성 튜터), 'ko-KR-Neural2-C' (남성 튜터)
+    voiceId: 'ko-KR-Neural2-A', // 'ko-KR-Neural2-A' (여성, 가장 자연스러움), 'ko-KR-Neural2-B' (남성), 'ko-KR-Neural2-C' (여성2)
     pitch: '+3st', // 칭찬할 때 기쁨이 가득 담기는 +3st 하이톤 적용
     rate: '1.05',  // 초등학생이 알아듣기 좋은 또렷하고 차분한 속도
     tone: '프리미엄 해요체',
@@ -34,6 +34,12 @@ export const STUDENT_CONFIG = {
 
 // 일반 텍스트 파싱
 export const getParsedMessage = (msgTemplate: string) => {
+  // 🛡️ 방어 코드: undefined/null 체크
+  if (!msgTemplate || typeof msgTemplate !== 'string') {
+    console.warn("⚠️ [getParsedMessage] 잘못된 입력값:", msgTemplate);
+    return "안녕하세요, 철수야!";
+  }
+
   return msgTemplate
     .replace(/{{learnerName}}/g, STUDENT_CONFIG.learnerName)
     .replace(/{{subject}}/g, STUDENT_CONFIG.subject);
@@ -41,6 +47,12 @@ export const getParsedMessage = (msgTemplate: string) => {
 
 // SSML (음성 마크업 언어) 파싱: 자연스러운 호흡(Prosody & Break) 포함
 export const getParsedSSML = (msgTemplate: string) => {
+  // 🛡️ 방어 코드: undefined/null 체크
+  if (!msgTemplate || typeof msgTemplate !== 'string') {
+    console.warn("⚠️ [getParsedSSML] 잘못된 입력값:", msgTemplate);
+    return `<speak><prosody rate="${STUDENT_CONFIG.voiceSettings.rate}" pitch="${STUDENT_CONFIG.voiceSettings.pitch}">안녕하세요</prosody></speak>`;
+  }
+
   // 실제 선생님의 호흡: "철수야!" 부르고 400ms(0.4초) 동안 아이와 눈을 맞추며 자연스럽게 쉬어가기
   const nameWithBreak = `${STUDENT_CONFIG.learnerName}야! <break time="400ms"/>`;
   let ssmlStr = msgTemplate
@@ -48,17 +60,22 @@ export const getParsedSSML = (msgTemplate: string) => {
     .replace(/{{learnerName}}야,/g, nameWithBreak)
     .replace(/{{learnerName}}/g, STUDENT_CONFIG.learnerName)
     .replace(/{{subject}}/g, STUDENT_CONFIG.subject);
-  
+
   // 속도와 피치를 감정에 맞게 최적화하는 SSML Prosody Tag 랩핑
   return `<speak><prosody rate="${STUDENT_CONFIG.voiceSettings.rate}" pitch="${STUDENT_CONFIG.voiceSettings.pitch}">${ssmlStr}</prosody></speak>`;
 };
 
 // ==========================================
-// 🛠 [크롬 호환성 엔진] Web Audio API BufferSource 
+// 🛠 [크롬 호환성 엔진] Web Audio API BufferSource + Speech API
 // ==========================================
 export let globalAudioCtx: AudioContext | null = null;
 
+// 크롬 Autoplay Policy 해결을 위한 음성 잠금 상태 변수
+let audioUnlocked = false;
+
+// 크롬 Autoplay Policy 해결을 위한 음성 잠금 해제 함수
 export const unlockAudio = async () => {
+    // 1. Web Audio API 잠금 해제
     if (!globalAudioCtx) {
         const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
         if (AudioCtx) {
@@ -69,6 +86,19 @@ export const unlockAudio = async () => {
     if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
         await globalAudioCtx.resume();
         console.log("🔓 [AudioContext] Force Resumed & Unlocked!");
+    }
+
+    // 2. Web Speech API 잠금 해제 (빈 utterance로 크롬 잠금 해제)
+    if (!audioUnlocked && window.speechSynthesis) {
+        try {
+            const utterance = new SpeechSynthesisUtterance('');
+            utterance.volume = 0; // 무음으로 재생
+            window.speechSynthesis.speak(utterance);
+            audioUnlocked = true;
+            console.log("🔓 [SpeechSynthesis] Audio unlocked for Chrome autoplay policy");
+        } catch (e) {
+            console.warn("Speech synthesis unlock failed:", e);
+        }
     }
 };
 
@@ -97,9 +127,22 @@ const playBufferSource = async (base64Audio: string, onStart?: () => void, onEnd
     }
 };
 
+// Web Speech API 직접 호출 도우미 함수
+const playWithWebSpeech = (text: string, onStart?: () => void, onEnd?: () => void) => {
+  console.log("📱 [Web Speech API] 직접 음성 재생 시작");
+  playVoiceFallback(text, onStart, onEnd);
+};
+
 // 범용 음성 재생 모듈 (Google Cloud Neural2 프리미엄 엔진 최우선)
 export const playVoice = async (message: string, onStart?: () => void, onEnd?: () => void) => {
+  // 🛡️ 방어 코드: 입력값 검증
+  if (!message || typeof message !== 'string') {
+    console.warn("⚠️ [playVoice] 잘못된 메시지:", message);
+    message = "안녕하세요, {{learnerName}}야!"; // 기본 메시지로 대체
+  }
+
   const ssml = getParsedSSML(message);
+  const text = getParsedMessage(message);
 
   // 1. 최고급 프리미엄 Neural2 엔진 호출 (API apiKey가 존재하는 경우에만)
   if (STUDENT_CONFIG.voiceSettings.apiKey) {
@@ -113,37 +156,39 @@ export const playVoice = async (message: string, onStart?: () => void, onEnd?: (
           audioConfig: { audioEncoding: 'MP3' }
         })
       });
-      
+
+      if (!response.ok) {
+        // 403 등 에러 시 바로 Web Speech API로 전환
+        console.log('Google TTS 실패(' + response.status + ') → Web Speech API로 전환');
+        playWithWebSpeech(text, onStart, onEnd);
+        return;
+      }
+
+      // 성공 시 기존 코드 유지
       const data = await response.json();
       if (data.audioContent) {
-         console.log("💎 [Premium Voice] Attempting Web Audio API BufferSource playback");
-         const played = await playBufferSource(data.audioContent, onStart, onEnd);
-         if (played) return; // 성공 시 여기서 종료
+        console.log("💎 [Premium Voice] Attempting Web Audio API BufferSource playback");
+        const played = await playBufferSource(data.audioContent, onStart, onEnd);
+        if (played) return; // 성공 시 여기서 종료
       }
-    } catch(e) {
-      console.error("[Premium TTS Failed, falling back to default...]:", e);
+
+    } catch (error) {
+      console.log('Google TTS 에러 → Web Speech API로 전환');
+      playWithWebSpeech(text, onStart, onEnd);
+      return;
     }
   }
 
-  // 2. 프리미엄 API 키 누락 시, 기존 구글 서버 스트리밍 무료 폴백 실행
-  const text = getParsedMessage(message);
-  try {
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ko-KR&client=tw-ob&q=${encodeURIComponent(text)}`;
-    const audio = new Audio(url);
-    audio.onplay = () => {
-      console.log("📡 [Server Fallback] Play stream:", text);
-      if(onStart) onStart();
-    };
-    audio.onended = () => { if(onEnd) onEnd(); };
-    audio.onerror = () => playVoiceFallback(text, onStart, onEnd);
-    audio.play().catch(() => playVoiceFallback(text, onStart, onEnd));
-  } catch(e) {
-    playVoiceFallback(text, onStart, onEnd);
-  }
+  // 2. 프리미엄 API 키 누락 시, Web Speech API 직접 폴백
+  console.log("📱 [Fallback Mode] Premium TTS key not found, using reliable Web Speech API");
+  playWithWebSpeech(text, onStart, onEnd);
 };
 
 // 3. 오프라인 브라우저 Web Speech API 로컬 폴백 (가장 마지막 안전장치)
-const playVoiceFallback = (text: string, onStart?: () => void, onEnd?: () => void) => {
+const playVoiceFallback = async (text: string, onStart?: () => void, onEnd?: () => void) => {
+  // 크롬 Autoplay Policy 해결을 위해 맨 첫 줄에 잠금 해제
+  await unlockAudio();
+
   console.warn("🔈 [WebSpeech API Fallback] Triggered");
   if (!window.speechSynthesis) {
      if(onStart) onStart();
@@ -152,11 +197,12 @@ const playVoiceFallback = (text: string, onStart?: () => void, onEnd?: () => voi
   }
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'ko-KR';
-  utterance.rate = parseFloat(STUDENT_CONFIG.voiceSettings.rate);
-  
+  utterance.rate = 0.9; // 크롬 호환성을 위한 고정 속도
+  utterance.volume = 1; // 최대 볼륨으로 설정
+
   if (onStart) utterance.onstart = onStart;
   if (onEnd) utterance.onend = onEnd;
-  
+
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
 };

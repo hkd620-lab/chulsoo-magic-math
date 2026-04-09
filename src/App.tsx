@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FlipMaster from './components/mastery/FlipMaster';
 import BridgeBuilder from './components/mastery/BridgeBuilder';
 import RatioDetective from './components/mastery/RatioDetective';
@@ -12,6 +12,25 @@ function App() {
   const [isStarted, setIsStarted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+
+  // 크롬 Autoplay Policy 해결: 첫 클릭 시 자동으로 음성 잠금 해제
+  useEffect(() => {
+    const handleFirstClick = async () => {
+      if (!audioUnlocked) {
+        await unlockAudio();
+        setAudioUnlocked(true);
+        console.log("🔓 사용자 첫 클릭으로 음성 잠금 해제 완료");
+      }
+    };
+
+    // 문서 전체에 한 번만 실행되는 클릭 이벤트 리스너 등록
+    document.addEventListener('click', handleFirstClick, { once: true });
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 정리
+    return () => {
+      document.removeEventListener('click', handleFirstClick);
+    };
+  }, [audioUnlocked]);
 
   // Dynamic config integration (Lego Block System - TS)
   const parsedGreeting = getParsedMessage(STUDENT_CONFIG.greetings.welcome);
