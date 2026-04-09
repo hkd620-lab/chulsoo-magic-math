@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import FlipMaster from './components/mastery/FlipMaster';
 import BridgeBuilder from './components/mastery/BridgeBuilder';
 import RatioDetective from './components/mastery/RatioDetective';
-import configData from './config.json';
+import { STUDENT_CONFIG, getParsedMessage } from './student_config';
 import './index.css';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Dynamic config integration (Lego Block System)
-  const { learnerName, subject, greetingMessage, appTitle } = configData;
-  const parsedGreeting = greetingMessage.replace(/{{learnerName}}/g, learnerName).replace(/{{subject}}/g, subject);
-  const parsedTitle = appTitle.replace(/{{learnerName}}/g, learnerName);
+  // Dynamic config integration (Lego Block System - TS)
+  const parsedGreeting = getParsedMessage(STUDENT_CONFIG.greetings.welcome);
+  const parsedTitle = `${STUDENT_CONFIG.learnerName}의 숫자 마법사`;
 
   const steps = [
     { title: '[1단계] 뒤집기 대장 🤸‍♂️', component: <FlipMaster /> },
