@@ -30,10 +30,47 @@ export const getParsedMessage = (msgTemplate: string) => {
     .replace(/{{subject}}/g, STUDENT_CONFIG.subject);
 };
 
-// 범용 음성 재생 모듈 (TTS)
+// 범용 음성 재생 모듈 (서버 스트리밍 TTS 우선, 실패 시 Web Speech Fallback)
 export const playVoice = (message: string, onStart?: () => void, onEnd?: () => void) => {
-  if (!window.speechSynthesis) return;
   const text = getParsedMessage(message);
+
+  try {
+    // 1. 구글 서버 사이드 비공식 TTS 엔드포인트를 이용한 안정적인 스트리밍 방식
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ko-KR&client=tw-ob&q=${encodeURIComponent(text)}`;
+    const audio = new Audio(url);
+    
+    audio.onplay = () => {
+      console.log("[Server TTS] Play stream:", text);
+      if(onStart) onStart();
+    };
+    
+    audio.onended = () => {
+      console.log("[Server TTS] End stream");
+      if(onEnd) onEnd();
+    };
+
+    audio.onerror = (e) => {
+      console.error("[Server TTS] Error:", e);
+      playVoiceFallback(text, onStart, onEnd);
+    };
+
+    audio.play().catch(e => {
+        console.error("[Server TTS] Blocked:", e);
+        playVoiceFallback(text, onStart, onEnd);
+    });
+  } catch(e) {
+    playVoiceFallback(text, onStart, onEnd);
+  }
+};
+
+// 2. 기존 브라우저 Web Speech API 
+const playVoiceFallback = (text: string, onStart?: () => void, onEnd?: () => void) => {
+  console.warn("[WebSpeech API Fallback] Triggered");
+  if (!window.speechSynthesis) {
+     if(onStart) onStart();
+     setTimeout(() => { if(onEnd) onEnd(); }, 2000);
+     return;
+  }
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'ko-KR';
   utterance.rate = STUDENT_CONFIG.voiceSettings.rate;
@@ -42,6 +79,6 @@ export const playVoice = (message: string, onStart?: () => void, onEnd?: () => v
   if (onStart) utterance.onstart = onStart;
   if (onEnd) utterance.onend = onEnd;
   
-  window.speechSynthesis.cancel(); // 기존 음성 취소
+  window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
 };

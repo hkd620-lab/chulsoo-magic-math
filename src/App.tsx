@@ -2,6 +2,7 @@ import { useState } from 'react';
 import FlipMaster from './components/mastery/FlipMaster';
 import BridgeBuilder from './components/mastery/BridgeBuilder';
 import RatioDetective from './components/mastery/RatioDetective';
+import DebugSoundTest from './components/mastery/DebugSoundTest';
 import { STUDENT_CONFIG, getParsedMessage, playVoice } from './student_config';
 import { Volume2, Play } from 'lucide-react';
 import './index.css';
@@ -39,6 +40,7 @@ function App() {
     { title: '[1단계] 뒤집기 대장 🤸‍♂️', component: <FlipMaster /> },
     { title: '[2단계] 마법 다리 만들기 🌉', component: <BridgeBuilder /> },
     { title: '[3단계] 숫자의 비밀 탐정 🔍', component: <RatioDetective /> },
+    { title: '[디버그] 사운드 시스템 🔧', component: <DebugSoundTest /> },
   ];
 
   // 인트로 화면 (브라우저 자동 재생 정책 준수용)
