@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 // https://vitejs.dev/config/
 export default defineConfig({
   root: './', // index.html이 위치한 프로젝트 최상단 디렉토리 명시
-  base: './', // 절대 경로 기준점 보장
+  base: '/', // 상대 경로 이탈 방지 및 정규 루트 포커싱
   plugins: [
     react(),
     tailwindcss(),

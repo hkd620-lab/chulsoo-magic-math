@@ -113,11 +113,13 @@ const playBufferSource = async (base64Audio: string, onStart?: () => void, onEnd
         for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
         
         const buffer = await globalAudioCtx.decodeAudioData(bytes.buffer);
+        stopCurrentAudio(); // 하울링 방지: 이전 재생 즉각 중단
         const source = globalAudioCtx.createBufferSource();
         source.buffer = buffer;
         source.connect(globalAudioCtx.destination);
         source.onended = () => { if(onEnd) onEnd(); };
         
+        currentAudioInstance = source; // 인스턴스 등록
         if (onStart) onStart();
         source.start(0);
         return true;
