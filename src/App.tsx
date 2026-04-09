@@ -3,27 +3,35 @@ import FlipMaster from './components/mastery/FlipMaster';
 import BridgeBuilder from './components/mastery/BridgeBuilder';
 import RatioDetective from './components/mastery/RatioDetective';
 import DebugSoundTest from './components/mastery/DebugSoundTest';
-import { STUDENT_CONFIG, getParsedMessage, playVoice } from './student_config';
-import { Volume2, Play } from 'lucide-react';
+import { STUDENT_CONFIG, getParsedMessage, playVoice, unlockAudio } from './student_config';
+import { Volume2, Play, Lock, Unlock } from 'lucide-react';
 import './index.css';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
   // Dynamic config integration (Lego Block System - TS)
   const parsedGreeting = getParsedMessage(STUDENT_CONFIG.greetings.welcome);
   const parsedTitle = `${STUDENT_CONFIG.learnerName}의 숫자 마법사`;
 
-  const handleStart = () => {
-    setIsStarted(true);
-    // 첫 만남 자동 재생 로직 (사용자 상호작용 후)
-    playVoice(
-      STUDENT_CONFIG.greetings.intro,
-      () => setIsSpeaking(true),
-      () => setIsSpeaking(false)
-    );
+  const handleStart = async () => {
+    // 1. 강제 오디오 잠금 해제 (The One-Click Unlock)
+    await unlockAudio();
+    setAudioUnlocked(true);
+    
+    // 약간의 딜레이로 안정적인 버퍼 확보 후 입장
+    setTimeout(() => {
+        setIsStarted(true);
+        // 첫 만남 자동 재생 로직 (AudioContext 확보 후 안전 재생)
+        playVoice(
+          STUDENT_CONFIG.greetings.intro,
+          () => setIsSpeaking(true),
+          () => setIsSpeaking(false)
+        );
+    }, 800);
   };
 
   const handleStepChange = (index: number) => {
@@ -43,22 +51,38 @@ function App() {
     { title: '[디버그] 사운드 시스템 🔧', component: <DebugSoundTest /> },
   ];
 
-  // 인트로 화면 (브라우저 자동 재생 정책 준수용)
+  // 인트로 화면 (브라우저 자동 재생 정책 강제 뚫기 용)
   if (!isStarted) {
     return (
-      <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 text-white w-full border-[10px] border-emerald-900/50">
-         <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 mb-12 drop-shadow-lg">
+      <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 text-white w-full border-[10px] border-emerald-900/50 relative overflow-hidden">
+         
+         {/* 시각적 증명 패널 (Total Verification) */}
+         <div className="absolute top-10 left-1/2 -translate-x-1/2 bg-slate-900 px-8 py-5 rounded-full border-2 border-slate-700 shadow-2xl flex items-center gap-4 transition-all duration-500 z-50">
+           {!audioUnlocked ? (
+             <>
+               <Lock className="text-red-500 animate-pulse" size={28} />
+               <span className="text-red-400 font-black text-2xl">소리가 잠겨 있습니다 🔇</span>
+             </>
+           ) : (
+             <>
+               <Unlock className="text-emerald-400" size={28} />
+               <span className="text-emerald-400 font-black text-2xl">선생님 목소리 준비 완료 🔊</span>
+             </>
+           )}
+         </div>
+
+         <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 mb-12 drop-shadow-lg mt-16">
            {parsedTitle}
          </h1>
-         <div className="text-2xl text-slate-300 font-bold mb-10 flex flex-col items-center gap-4">
-           선생님이 철수를 기다리고 있어요! 준비됐나요?
+         <div className="text-3xl text-slate-300 font-black mb-16 flex flex-col items-center gap-4">
+           선생님이 {STUDENT_CONFIG.learnerName}를 애타게 기다리고 있어요!
          </div>
          <button 
            onClick={handleStart} 
-           className="flex items-center gap-4 bg-emerald-500 hover:bg-emerald-400 px-12 py-6 rounded-full text-4xl font-black shadow-[0_0_50px_rgba(16,185,129,0.8)] hover:scale-105 transition-all text-slate-900 animate-pulse"
+           className="flex items-center gap-6 bg-emerald-500 hover:bg-emerald-400 px-16 py-8 rounded-[3rem] text-5xl font-black shadow-[0_0_80px_rgba(16,185,129,0.8)] hover:scale-105 transition-all text-slate-900 animate-pulse border-4 border-white z-10"
          >
-           <Play fill="currentColor" size={48} />
-           마법 세계로 입장하기!
+           <Play fill="currentColor" size={60} />
+           ▶️ {STUDENT_CONFIG.learnerName}의 마법 학교 입장하기
          </button>
       </div>
     );

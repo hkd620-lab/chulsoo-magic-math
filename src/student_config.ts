@@ -53,6 +53,50 @@ export const getParsedSSML = (msgTemplate: string) => {
   return `<speak><prosody rate="${STUDENT_CONFIG.voiceSettings.rate}" pitch="${STUDENT_CONFIG.voiceSettings.pitch}">${ssmlStr}</prosody></speak>`;
 };
 
+// ==========================================
+// 🛠 [크롬 호환성 엔진] Web Audio API BufferSource 
+// ==========================================
+export let globalAudioCtx: AudioContext | null = null;
+
+export const unlockAudio = async () => {
+    if (!globalAudioCtx) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+            globalAudioCtx = new AudioContext();
+        }
+    }
+    // 명시적으로 오디오 잠금 해제 (Resume)
+    if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+        await globalAudioCtx.resume();
+        console.log("🔓 [AudioContext] Force Resumed & Unlocked!");
+    }
+};
+
+const playBufferSource = async (base64Audio: string, onStart?: () => void, onEnd?: () => void) => {
+    if (!globalAudioCtx) await unlockAudio();
+    if (!globalAudioCtx) return false;
+
+    try {
+        const binaryString = window.atob(base64Audio);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
+        
+        const buffer = await globalAudioCtx.decodeAudioData(bytes.buffer);
+        const source = globalAudioCtx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(globalAudioCtx.destination);
+        source.onended = () => { if(onEnd) onEnd(); };
+        
+        if (onStart) onStart();
+        source.start(0);
+        return true;
+    } catch(e) {
+        console.error("❌ Web Audio API decode error:", e);
+        return false;
+    }
+};
+
 // 범용 음성 재생 모듈 (Google Cloud Neural2 프리미엄 엔진 최우선)
 export const playVoice = async (message: string, onStart?: () => void, onEnd?: () => void) => {
   const ssml = getParsedSSML(message);
@@ -72,12 +116,9 @@ export const playVoice = async (message: string, onStart?: () => void, onEnd?: (
       
       const data = await response.json();
       if (data.audioContent) {
-         console.log("💎 [Premium Neural2 Voice] Played: Advanced Prosody Sync Complete");
-         const audio = new Audio("data:audio/mp3;base64," + data.audioContent);
-         audio.onplay = () => { if (onStart) onStart(); };
-         audio.onended = () => { if (onEnd) onEnd(); };
-         audio.play();
-         return;
+         console.log("💎 [Premium Voice] Attempting Web Audio API BufferSource playback");
+         const played = await playBufferSource(data.audioContent, onStart, onEnd);
+         if (played) return; // 성공 시 여기서 종료
       }
     } catch(e) {
       console.error("[Premium TTS Failed, falling back to default...]:", e);
