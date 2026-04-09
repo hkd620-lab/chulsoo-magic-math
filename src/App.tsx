@@ -2,10 +2,16 @@ import React, { useState } from 'react';
 import FlipMaster from './components/mastery/FlipMaster';
 import BridgeBuilder from './components/mastery/BridgeBuilder';
 import RatioDetective from './components/mastery/RatioDetective';
+import configData from './config.json';
 import './index.css';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Dynamic config integration (Lego Block System)
+  const { learnerName, subject, greetingMessage, appTitle } = configData;
+  const parsedGreeting = greetingMessage.replace(/{{learnerName}}/g, learnerName).replace(/{{subject}}/g, subject);
+  const parsedTitle = appTitle.replace(/{{learnerName}}/g, learnerName);
 
   const steps = [
     { title: '[1단계] 뒤집기 대장 🤸‍♂️', component: <FlipMaster /> },
@@ -15,14 +21,14 @@ function App() {
 
   return (
     <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 font-sans h-full text-white w-full">
-      <header className="mb-8 text-center flex-shrink-0 relative mt-6">
-        <div className="absolute -top-10 inset-x-0 mx-auto text-amber-300 font-black text-2xl drop-shadow-md animate-bounce">
-          🎉 철수야, 오늘도 숫자 마법을 즐겁게 시작해볼까요? 화이팅! 🚀
+      <header className="mb-8 text-center flex-shrink-0 relative mt-8">
+        <div className="absolute -top-12 inset-x-0 mx-auto text-amber-300 font-extrabold text-2xl drop-shadow-md animate-bounce">
+          {parsedGreeting}
         </div>
-        <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500 tracking-tight drop-shadow-lg mb-4">
-          철수의 숫자 마법사
+        <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 tracking-tight drop-shadow-lg mb-4">
+          {parsedTitle}
         </h1>
-        <p className="mt-4 text-slate-300 font-bold text-3xl">"역수(물구나무 숫자)"로 마법 부려봐요! ✨</p>
+        <p className="mt-4 text-slate-300 font-bold text-3xl">물구나무 숫자로 마법 부려봐요! ✨</p>
       </header>
 
       <div className="flex gap-4 mb-10">

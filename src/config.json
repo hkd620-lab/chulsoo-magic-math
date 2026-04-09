@@ -1,0 +1,10 @@
+{
+  "learnerName": "철수",
+  "appTitle": "{{learnerName}}의 숫자 마법사",
+  "subject": "숫자 마법",
+  "theme": {
+    "primaryColor": "amber",
+    "secondaryColor": "orange"
+  },
+  "greetingMessage": "🎉 {{learnerName}}야, 오늘도 {{subject}}을 즐겁게 시작해볼까요? 화이팅! 🚀"
+}
