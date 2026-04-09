@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+    /* Custom theme extensions can go here */
+}
+
+/* Reset and basic setup */
+html, body, #root {
+    @apply h-full w-full m-0 p-0 antialiased bg-slate-950;
+}
