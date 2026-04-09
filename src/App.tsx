@@ -15,11 +15,14 @@ function App() {
 
   return (
     <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 font-sans h-full text-white w-full">
-      <header className="mb-8 text-center flex-shrink-0">
+      <header className="mb-8 text-center flex-shrink-0 relative mt-6">
+        <div className="absolute -top-10 inset-x-0 mx-auto text-amber-300 font-black text-2xl drop-shadow-md animate-bounce">
+          🎉 철수야, 오늘도 숫자 마법을 즐겁게 시작해볼까요? 화이팅! 🚀
+        </div>
         <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500 tracking-tight drop-shadow-lg mb-4">
-          훌라당! 숫자 뒤집기
+          철수의 숫자 마법사
         </h1>
-        <p className="mt-4 text-slate-300 font-bold text-3xl">"역수(물구나무 숫자)"로 마법 부리기! ✨</p>
+        <p className="mt-4 text-slate-300 font-bold text-3xl">"역수(물구나무 숫자)"로 마법 부려봐요! ✨</p>
       </header>
 
       <div className="flex gap-4 mb-10">
