@@ -8,18 +8,18 @@ function App() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
-    { title: 'Flip Master', component: <FlipMaster /> },
-    { title: 'Bridge Builder', component: <BridgeBuilder /> },
-    { title: 'Ratio Detective', component: <RatioDetective /> },
+    { title: '[1단계] 뒤집기 대장 🤸‍♂️', component: <FlipMaster /> },
+    { title: '[2단계] 마법 다리 만들기 🌉', component: <BridgeBuilder /> },
+    { title: '[3단계] 숫자의 비밀 탐정 🔍', component: <RatioDetective /> },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 font-sans h-full text-white w-full">
+    <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center justify-center p-8 font-sans h-full text-white w-full">
       <header className="mb-8 text-center flex-shrink-0">
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500 tracking-tight drop-shadow-lg">
-          Flip & Match
+        <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500 tracking-tight drop-shadow-lg mb-4">
+          훌라당! 숫자 뒤집기
         </h1>
-        <p className="mt-2 text-slate-400 font-medium text-lg">역수와 비례식 정복 프로젝트</p>
+        <p className="mt-4 text-slate-300 font-bold text-3xl">"역수(물구나무 숫자)"로 마법 부리기! ✨</p>
       </header>
 
       <div className="flex gap-4 mb-10">
@@ -27,9 +27,9 @@ function App() {
           <button
             key={idx}
             onClick={() => setCurrentStep(idx)}
-            className={`px-8 py-3 rounded-full font-bold transition-all duration-300 shadow-lg border cursor-pointer ${
+            className={`px-8 py-4 rounded-full font-bold transition-all duration-300 shadow-lg border-2 cursor-pointer text-xl ${
               currentStep === idx
-                ? 'bg-indigo-600 text-white border-indigo-400 transform scale-105 shadow-indigo-500/50'
+                ? 'bg-indigo-600 text-white border-indigo-400 transform scale-105 shadow-[0_0_20px_rgba(99,102,241,0.5)]'
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700 hover:text-white'
             }`}
           >
@@ -38,8 +38,8 @@ function App() {
         ))}
       </div>
 
-      <main className="w-full max-w-4xl h-[50vh] transition-all bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl flex relative">
-        <div className="w-full h-full p-2">
+      <main className="w-full max-w-5xl h-[65vh] transition-all bg-slate-900/50 rounded-3xl border-2 border-slate-700 overflow-hidden shadow-2xl flex relative p-2">
+        <div className="w-full h-full">
             {steps[currentStep].component}
         </div>
       </main>
