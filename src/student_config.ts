@@ -13,13 +13,35 @@ export const STUDENT_CONFIG = {
   },
   greetings: {
     welcome: '🎉 {{learnerName}}야, 오늘도 {{subject}} 마법을 즐겁게 시작해볼까요? 화이팅! 🚀',
+    intro: '안녕, {{learnerName}}야! 나는 너의 숫자 마법사 선생님이야. 오늘은 숫자를 물구나무 세우는 신기한 마법을 배워볼 거야. 준비됐니?',
     success: '우와! {{learnerName}} 최고예요! 완벽해요!',
     encourage: '괜찮아요, {{learnerName}}! 다시 한번 천천히 해볼까요?',
-  }
+  },
+  stepInstructions: [
+    "1단계 뒤집기 대장입니다! 물구나무 숫자를 1초 안에 빨리 찾아보세요!",
+    "2단계 마법 다리 만들기입니다. 나눗셈을 곱셈으로 바꾸면 숫자가 스르륵 서커스처럼 뒤집혀요!",
+    "3단계 숫자의 비밀 탐정입니다. 숨겨진 비례식을 저울을 이용해 추리해봐요!"
+  ]
 };
 
 export const getParsedMessage = (msgTemplate: string) => {
   return msgTemplate
     .replace(/{{learnerName}}/g, STUDENT_CONFIG.learnerName)
     .replace(/{{subject}}/g, STUDENT_CONFIG.subject);
+};
+
+// 범용 음성 재생 모듈 (TTS)
+export const playVoice = (message: string, onStart?: () => void, onEnd?: () => void) => {
+  if (!window.speechSynthesis) return;
+  const text = getParsedMessage(message);
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ko-KR';
+  utterance.rate = STUDENT_CONFIG.voiceSettings.rate;
+  utterance.pitch = STUDENT_CONFIG.voiceSettings.pitch;
+  
+  if (onStart) utterance.onstart = onStart;
+  if (onEnd) utterance.onend = onEnd;
+  
+  window.speechSynthesis.cancel(); // 기존 음성 취소
+  window.speechSynthesis.speak(utterance);
 };

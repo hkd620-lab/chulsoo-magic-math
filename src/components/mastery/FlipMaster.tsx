@@ -1,20 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { STUDENT_CONFIG, getParsedMessage } from '../../student_config';
-
-// ----------------------------------------
-// 보이스 지원 싱글톤 함수 (멀티모달 TTS 연동)
-// ----------------------------------------
-const playVoice = (message: string) => {
-  if (!window.speechSynthesis) return;
-  const text = getParsedMessage(message);
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ko-KR';
-  utterance.rate = STUDENT_CONFIG.voiceSettings.rate;
-  utterance.pitch = STUDENT_CONFIG.voiceSettings.pitch;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utterance);
-};
+import { STUDENT_CONFIG, playVoice } from '../../student_config';
 
 // ----------------------------------------
 // 문제 뱅크 자동 생성 (난이도 자동 조절 알고리즘)
