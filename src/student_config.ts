@@ -10,12 +10,16 @@ export const STUDENT_CONFIG = {
   theme: {
     primaryColor: 'amber',
     secondaryColor: 'orange',
+    bananaClass: 'bg-amber-400 text-slate-900', // 영희 모드일 때: 'bg-pink-400 text-white'로 쉽게 규격화 교체 가능
+    bananaGlow: 'rgba(251,191,36,0.8)', // 옐로우 바나나 글로우
   },
   greetings: {
     welcome: '🎉 {{learnerName}}야, 오늘도 {{subject}} 마법을 즐겁게 시작해볼까요? 화이팅! 🚀',
     intro: '안녕, {{learnerName}}야! 나는 너의 숫자 마법사 선생님이야. 오늘은 숫자를 물구나무 세우는 신기한 마법을 배워볼 거야. 준비됐니?',
     success: '우와! {{learnerName}} 최고예요! 완벽해요!',
     encourage: '괜찮아요, {{learnerName}}! 다시 한번 천천히 해볼까요?',
+    transform: '훌라당! 스파크와 함께 나눗셈이 곱셈으로 바뀌고, 숫자가 다이내믹하게 물구나무를 섰어!',
+    nanBananaUnite: '우와! {{learnerName}}야! 수많은 나노바나나가 하나의 거대한 마법의 다리 1로 증명되었어!',
   },
   stepInstructions: [
     "1단계 뒤집기 대장입니다! 물구나무 숫자를 1초 안에 빨리 찾아보세요!",
