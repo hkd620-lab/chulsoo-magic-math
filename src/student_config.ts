@@ -70,6 +70,24 @@ export const getParsedSSML = (msgTemplate: string) => {
 // ==========================================
 export let globalAudioCtx: AudioContext | null = null;
 
+export let currentAudioInstance: AudioBufferSourceNode | HTMLAudioElement | null = null;
+
+export const stopCurrentAudio = () => {
+    if (currentAudioInstance) {
+        if ('stop' in currentAudioInstance) {
+            try { (currentAudioInstance as AudioBufferSourceNode).stop(); } catch(e) {}
+        } else if ('pause' in currentAudioInstance) {
+            try { 
+                const audio = currentAudioInstance as HTMLAudioElement;
+                audio.pause(); 
+                audio.currentTime = 0; 
+            } catch(e) {}
+        }
+        currentAudioInstance = null;
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+};
+
 // 크롬 Autoplay Policy 해결을 위한 음성 잠금 상태 변수
 let audioUnlocked = false;
 
@@ -205,6 +223,6 @@ const playVoiceFallback = async (text: string, onStart?: () => void, onEnd?: () 
   if (onStart) utterance.onstart = onStart;
   if (onEnd) utterance.onend = onEnd;
 
-  window.speechSynthesis.cancel();
+  stopCurrentAudio(); // 기존 음성 취소 로직을 하울링 방지 로직으로 대체
   window.speechSynthesis.speak(utterance);
 };
