@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playVoice } from '../../student_config';
-import { Search, Gauge, Clock, Scale, Trophy, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Trophy, CheckCircle2, XCircle } from 'lucide-react';
 import InlineSpeaker from './InlineSpeaker';
 
 // 20개의 실생활 추리 미션 데이터 (속력/시간, 환율 달러/원, 피자/레시피 등)
@@ -33,7 +33,7 @@ export default function RatioDetective() {
   const [isPlayingId, setIsPlayingId] = useState<number | null>(null);
   const [step, setStep] = useState(0); 
   const [missionIdx, setMissionIdx] = useState(0);
-  const [score, setScore] = useState(0);
+  const [, setScore] = useState(0);
   const [feedback, setFeedback] = useState<'idle' | 'correct' | 'wrong'>('idle');
   
   const mission = DETECTIVE_MISSIONS[missionIdx];

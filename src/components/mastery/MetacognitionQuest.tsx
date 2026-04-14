@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Trophy, Star, Crown, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
+import { Trophy, Crown, ChevronRight, CheckCircle2, XCircle } from 'lucide-react';
 import { playVoice } from '../../student_config';
 
 // 더미 퀴즈 데이터 생성기
@@ -66,14 +66,6 @@ export default function MetacognitionQuest() {
 
   const currentQuiz = QUIZZES[currentIndex];
   
-  // 선생님 보이스 가이드 (On-Demand)
-  const handleTeacherVoice = () => {
-    let msg = "";
-    if (currentIndex < 7) msg = "분모와 분자의 위아래를 뒤집어보세요!";
-    else if (currentIndex < 14) msg = "나눗셈을 곱셈으로 바꿀 땐 뒤의 숫자가 물구나무를 선답니다.";
-    else msg = "실생활 문제네요! 전체를 조각으로 나누면 몇 개가 나올지 상상해봐요.";
-    playVoice(msg);
-  };
 
   const handleSelect = (idx: number) => {
     if (selectedOption !== null) return;

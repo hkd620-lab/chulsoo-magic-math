@@ -1,18 +1,18 @@
-import { STUDENT_CONFIG, unlockAudio, playVoice } from '../../student_config';
-import { Play, Lock, Unlock, BookOpen, Target, Sparkles, Map } from 'lucide-react';
+import { STUDENT_CONFIG } from '../../student_config';
+import { Lock, Unlock, Target, Sparkles, Map } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function WelcomeLanding({ 
-  audioUnlocked, 
-  onStart 
-}: { 
-  audioUnlocked: boolean; 
+export default function WelcomeLanding({
+  audioUnlocked,
+  onStart
+}: {
+  audioUnlocked: boolean;
   onStart: () => void;
 }) {
 
   return (
     <div className="min-h-[100dvh] bg-slate-950 flex flex-col items-center py-20 px-8 text-white w-full border-[10px] border-indigo-900/50 relative overflow-y-auto custom-scrollbar">
-      
+
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -32,7 +32,7 @@ export default function WelcomeLanding({
         )}
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-5xl w-full flex flex-col items-center z-10"
@@ -41,12 +41,12 @@ export default function WelcomeLanding({
           {STUDENT_CONFIG.learnerName}의 숫자 마법 학교 🧙‍♂️
         </h1>
         <p className="text-2xl text-slate-300 font-bold mb-16 text-center max-w-3xl leading-relaxed">
-          분수와 나눗셈이 두려운 친구들을 위한 마법 같은 놀이터에 오신 것을 환영합니다! <br/>
+          분수와 나눗셈이 두려운 친구들을 위한 마법 같은 놀이터에 오신 것을 환영합니다! <br />
           공식만 무작정 외우는 수학은 이제 그만! 원리를 직접 만지고 느껴보세요.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full mb-16">
-          
+
           {/* 6하 원칙 패널 */}
           <div className="bg-slate-900/80 p-8 rounded-3xl border border-indigo-500/30 shadow-[0_0_30px_rgba(79,70,229,0.15)] flex flex-col">
             <h2 className="text-3xl font-black text-indigo-300 mb-8 flex items-center gap-3">
@@ -103,8 +103,8 @@ export default function WelcomeLanding({
         </div>
 
         <motion.div animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
-          <button 
-            onClick={onStart} 
+          <button
+            onClick={onStart}
             className="flex items-center gap-6 bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 px-16 py-8 rounded-[3rem] text-4xl font-black shadow-[0_0_60px_rgba(16,185,129,0.6)] transition-all text-slate-900 border-4 border-white mb-10"
           >
             <Sparkles fill="currentColor" size={40} className="text-yellow-300" />

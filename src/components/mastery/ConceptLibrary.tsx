@@ -1,6 +1,6 @@
 import { useState } from 'react';
 // Force Vite HMR rebuild
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { BookOpen, Layers, RotateCcw, Pizza, Lock, Crown } from 'lucide-react';
 import InlineSpeaker from './InlineSpeaker';
 import { playVoice } from '../../student_config';
