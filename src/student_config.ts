@@ -3,13 +3,13 @@ export const STUDENT_CONFIG = {
   subject: '역수와 비례식',
   voiceSettings: {
     // ------------------------------------------
-    // 💎 [프리미엄 보이스 설정] Google Cloud Neural2
+    // 💎 [기존 Neural2 -> 변경] Gemini 1.5 기반 프리미엄 보이스 설정
     // ------------------------------------------
     apiKey: import.meta.env.VITE_GOOGLE_TTS_API_KEY || '', // .env 파일에 키 입력
-    voiceId: 'ko-KR-Neural2-A', // 'ko-KR-Neural2-A' (여성, 가장 자연스러움), 'ko-KR-Neural2-B' (남성), 'ko-KR-Neural2-C' (여성2)
+    voiceId: 'ko-KR-Chirp3-HD-Aoede', // Gemini 1.5 기반 스마트 멘토 음성 (Aoede)
     pitch: '+3st', // 칭찬할 때 기쁨이 가득 담기는 +3st 하이톤 적용
     rate: '1.05',  // 초등학생이 알아듣기 좋은 또렷하고 차분한 속도
-    tone: '프리미엄 해요체',
+    tone: '프리미엄 스마트해요체',
   },
   theme: {
     primaryColor: 'amber',
@@ -26,9 +26,12 @@ export const STUDENT_CONFIG = {
     nanBananaUnite: '우와! {{learnerName}}야! 수많은 나노바나나가 하나의 거대한 마법의 다리 1로 증명되었어!',
   },
   stepInstructions: [
+    "마법의 기초를 다지는 개념의 방입니다. 분수, 역수, 통분의 완벽한 비밀을 배워보세요!",
     "1단계 뒤집기 대장입니다! 물구나무 숫자를 1초 안에 빨리 찾아보세요!",
     "2단계 마법 다리 만들기입니다. 나눗셈을 곱셈으로 바꾸면 숫자가 스르륵 서커스처럼 뒤집혀요!",
-    "3단계 숫자의 비밀 탐정입니다. 숨겨진 비례식을 저울을 이용해 추리해봐요!"
+    "3단계 숫자의 비밀 탐정입니다. 숨겨진 비례식을 저울을 이용해 추리해봐요!",
+    "마지막 도전! 마법 퀴즈 시간입니다! 지금까지 배운 마법들을 뽐내보세요!",
+    "디버그 사운드 시스템을 확인합니다."
   ]
 };
 
